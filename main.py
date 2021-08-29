@@ -58,9 +58,9 @@ async def help(ctx):
     await ctx.send(embed=embed)
 
 #~~~~~~~~~~~~~~~~~~~~~CREATOR~~~~~~~~~~~~~~~~~~~~~
-@client.command()
-@cooldown(1,15, BucketType.user)
-async def creator(ctx):
+# @client.command()
+# @cooldown(1,15, BucketType.user)
+# async def creator(ctx):
 
 
 #~~~~~~~~~~~~~~~~~~~~~GRAPHS~~~~~~~~~~~~~~~~~~~~~
@@ -100,9 +100,6 @@ async def graphs(ctx, *, code):
         ia = ''
 
     url = getUrl(save, ia)
-    #generates the URL for the skanderbeg request given conditions above
-    def getUrl (saveID, iaID):
-      return 'https://skanderbeg.pm/api.php?key='+SKANDERBEG_API+'&scope=getCountryData&save=' + saveID + '&tag=IRE&value=inc_no_subs;total_development;buildings_value;provinces;total_army;qualityScore;total_mana_spent_on_deving;total_mana_on_teching_up;spent_total;fdp;total_mana_spent_on_deving;battleCasualties;max_manpower;continents;dev_clicks;total_navy;total_army;hex;player;countryName&' + iaID + '&format=json'
     
     #gets response from Skanderbeg API, parses to data.json file
     response = rq.get(url)
@@ -118,7 +115,7 @@ async def graphs(ctx, *, code):
             await ctx.send(
                 f'Invalid Skanderbeg Save id / the Skanderbeg server is offline \n Try to redo the command with the correct id or dm me with:,creator')
 
-    #creates dataframe with pandas
+    #creates dataframe with pandas, based on what stats wanted in the API call
     df = pd.read_json('data.json')
     corpus = df.iloc[0][1]
     csv_columns = ['tag', 'fdp', 'battleCasualties', 'max_manpower', 'countryName', 'player', 'total_development',
@@ -126,6 +123,7 @@ async def graphs(ctx, *, code):
                    'total_mana_spent_on_deving', 'buildings_value', 'continents', 'total_navy', 'dev_clicks',
                    'deving_stats', 'hex']
 
+    #grabs all the tags, adds them as the first column of the table
     i = 0
     dict = []
     tags = []
@@ -137,6 +135,7 @@ async def graphs(ctx, *, code):
         dict.append(a)
         i = i + 1
 
+    #writes provences to a CSV
     csv_file = "found.csv"
     try:
         with open(csv_file, 'w', newline='') as csvfile:
@@ -148,8 +147,11 @@ async def graphs(ctx, *, code):
                         writer.writerow(data)
     except IOError:
         print("I/O error")
+
+    #does it again if save 2 exists
+    #TODO: abstract this to any number of saves
     if save2 != '':
-        url = 'https://skanderbeg.pm/api.php?key='+SKANDERBEG_API+'&scope=getCountryData&save=' + save2 + '&tag=IRE&value=inc_no_subs;total_development;buildings_value;provinces;total_army;qualityScore;total_mana_spent_on_deving;total_mana_on_teching_up;spent_total;fdp;total_mana_spent_on_deving;battleCasualties;max_manpower;continents;dev_clicks;total_navy;hex;total_army;player;countryName&' + ia + '&format=json'
+        url = getUrl(save2, ia)
         response = rq.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
         with open('data.json', 'w', encoding='utf-8') as f_out:
@@ -188,20 +190,26 @@ async def graphs(ctx, *, code):
                             writer.writerow(data)
         except IOError:
             print("I/O error")
+
+    #writes the found to .csv
     with open('found.csv', 'r') as csvfile:
         lines = csvfile.readlines()
     x = 'found.csv'
     y = 'found2.csv'
+
+    #writes to pandas dataframe
     df1 = pd.read_csv(x, encoding='latin1')
     try:
         df2 = pd.read_csv(y, encoding='latin1')
-
     except:
         y = 'found.csv'
         df2 = pd.read_csv(y, encoding='latin1')
 
+    #cleans up DF values
     def replace(df):
         a = df.columns
+        # print("replace funciton, here is df before transform: ")
+        # print(df)
         list(a)
         h = []
         j = []
@@ -213,100 +221,48 @@ async def graphs(ctx, *, code):
             z = y.replace('_', '')
             j.append(z)
         df.rename(columns={x: y for x, y in zip(h, j)}, inplace=True)
+        # print("replace funciton, here is df after transform: ")
+        # print(df)
 
     replace(df1)
     replace(df2)
 
+    #fills N/A values with 0
     df1['totalarmy'] = df1['totalarmy'].fillna(0)
     df1['totalnavy'] = df1['totalnavy'].fillna(0)
     df2['totalarmy'] = df2['totalarmy'].fillna(0)
     df2['totalnavy'] = df2['totalnavy'].fillna(0)
     df1['buildingsvalue'] = df1['buildingsvalue'].fillna(0)
     df2['buildingsvalue'] = df2['buildingsvalue'].fillna(0)
+
+
     lista1 = [df1, df2]
     lista = [df1]
-    date = [1444, 1469, 1481, 1]
+    # date = [1444, 1469, 1481, 1]
+
+    #tags to list
     tags = df1['tag'].tolist()
     tagss = tags
-    print(tags)
+    # print(tags)
+
+
     players = df1['countryName'].tolist()
     i = 0
+    # print("Players list: \n")
+    # print(players)
+
+    #This normalizes the tags
     for player in players:
         if type(player) == type(0.54):
             players[i] = tags[i]
         i += 1
-
-    def a_su_b(dfa, dfb, nomicolonne):
-        dfx = pd.DataFrame()
-        i = 0
-        length = len(nomicolonne)
-        while i < length:
-            z = nomicolonne[i]
-            x = [a / b for a, b in zip(dfa[z], dfb[z])]
-            dfx[z] = x
-            i += 1
-        return dfx
-
-    def calcolatorespaziatrura(ncolonne):
-        a = ((4 * ncolonne) + 45) / 2000
-        return a
-
-    def calcolosize(ncolonne):
-        size = ((1 / 5) * -ncolonne) + 14
-        return size
-
-    def humanvalue(dict, I, tags):
-        j = I
-        a = []
-        for i in tags:
-            x = dict[i]
-            try:
-                s = x[I]
-                y = round(s, 2)
-                a.append(y)
-            except:
-                pass
-        return (a)
-
-    def sumof(data):
-        a = 0
-        for row in data:
-            a = a + row
-        return a
-
-    def testosucolonne(columns, ncifre):
-        return columns
-
-    def devonnprovince(data):
-        x = [round(i / k, 1) for i, k in zip(data['realdevelopment'], data['provinces'])]
-        return x
-
-    def func(pct, allvals):
-        absolute = int(pct / 100. * np.sum(allvals))
-        return "{:.1f}%\n{:d}".format(pct, absolute)
-
-    def sostituisci(df):
-        dft = df.T
-        dict = dft.to_dict()
-        for i in list(df.index.values):
-            a = df['tag']
-            y = a[i]
-            dict[y] = dict.pop(i)
-        return dict
-
-    def human(df):
-        Humanplayers = df.loc[
-            (df['tag'] == 'TUR') | (df['tag'] == 'FRA') | (df['tag'] == 'MOS') | (df['tag'] == 'CAS') | (
-                    df['tag'] == 'ENG') | (df['tag'] == 'HAB') | (df['tag'] == 'QOM') | (df['tag'] == 'PER') | (
-                    df['tag'] == 'SWE') | (df['tag'] == 'BRA') | (df['tag'] == 'HOL') | (
-                    df['tag'] == 'SWI') | (df['tag'] == 'PAL')]
-        return Humanplayers
-
-    def prova(listadf):
-
+    
+    
+    #
+    def trial(listadf):
         i = 0
         for df in listadf:
-            dict = sostituisci(df)
+            dict = transposeReplace(df)
             humandict = {item: dict.get(item) for item in tagss}
             playerdev = humanvalue(humandict, 'totaldevelopment', tags)
             playerincome = humanvalue(humandict, 'incnosubs', tags)
@@ -375,7 +331,7 @@ async def graphs(ctx, *, code):
                  dfplayermaxmanpower, dfplayertotalnavy, playerfdp, playerclick]
         return tutto
 
-    ogni = prova(lista)
+    ogni = trial(lista)
     k = 0
     # colori grafico
 
@@ -1069,5 +1025,89 @@ async def graphs(ctx, *, code):
 
     await ctx.send('My creator is MasonStevens95#5018,and he is the best eu4 player')
 
+
+#-----------------------------FUNCTIONS---------------------------------
+
+#generates the URL for the skanderbeg request given conditions above
+#TODO: add options for what graphs wanted in each request
+def getUrl (saveID, iaID):
+  return 'https://skanderbeg.pm/api.php?key='+SKANDERBEG_API+'&scope=getCountryData&save=' + saveID + '&tag=IRE&value=inc_no_subs;total_development;buildings_value;provinces;total_army;qualityScore;total_mana_spent_on_deving;total_mana_on_teching_up;spent_total;fdp;total_mana_spent_on_deving;battleCasualties;max_manpower;continents;dev_clicks;total_navy;total_army;hex;player;countryName&' + iaID + '&format=json'
+
+#Not used?
+def a_su_b(dfa, dfb, nomicolumn):
+    dfx = pd.DataFrame()
+    i = 0
+    length = len(nomicolumn)
+    while i < length:
+        z = nomicolumn[i]
+        x = [a / b for a, b in zip(dfa[z], dfb[z])]
+        dfx[z] = x
+        i += 1
+    return dfx
+
+#TODO: Unknown what used for - calculate ranges between? for graphs
+def calcolatorespaziatrura(ncolumn):
+    a = ((4 * ncolumn) + 45) / 2000
+    return a
+
+#TODO: Calculate column size?
+def calcolosize(ncolumn):
+    size = ((1 / 5) * -ncolumn) + 14
+    return size
+
+#TODO: what was j for? what is human value
+def humanvalue(dict, I, tags):
+        j = I
+        a = []
+        for i in tags:
+            x = dict[i]
+            try:
+                s = x[I]
+                y = round(s, 2)
+                a.append(y)
+            except:
+                pass
+        return (a)
+
+#Adds all rows together
+def sumof(data):
+    a = 0
+    for row in data:
+        a = a + row
+    return a
+
+#unused
+def testosucolumn(columns, ncifre):
+    return columns
+
+#TODO: No longer used
+def devonnprovince(data):
+    x = [round(i / k, 1) for i, k in zip(data['realdevelopment'], data['provinces'])]
+    return x
+
+#TODO
+def func(pct, allvals):
+    absolute = int(pct / 100. * np.sum(allvals))
+    return "{:.1f}%\n{:d}".format(pct, absolute)
+
+#
+def transposeReplace(df):
+    dft = df.T
+    dict = dft.to_dict()
+    for i in list(df.index.values):
+        a = df['tag']
+        y = a[i]
+        dict[y] = dict.pop(i)
+    return dict
+
+def human(df):
+    Humanplayers = df.loc[
+        (df['tag'] == 'TUR') | (df['tag'] == 'FRA') | (df['tag'] == 'MOS') | (df['tag'] == 'CAS') | (
+                df['tag'] == 'ENG') | (df['tag'] == 'HAB') | (df['tag'] == 'QOM') | (df['tag'] == 'PER') | (
+                df['tag'] == 'SWE') | (df['tag'] == 'BRA') | (df['tag'] == 'HOL') | (
+                df['tag'] == 'SWI') | (df['tag'] == 'PAL')]
+    return Humanplayers
+
+#-------------------------RUN BOT----------------------------
 
 client.run(os.environ['DISCORD KEY'])
