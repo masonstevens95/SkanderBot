@@ -67,9 +67,11 @@ async def creator(ctx):
 @client.command()
 @cooldown(1, 120, BucketType.user)
 async def graphs(ctx, *, code):
+
     await ctx.send('wait for the graphs')
     a = code
     save = code
+
     print('do you want to compare this save with an older one?[y/n]')
     resp1 = 'n'
     save2 = ''
@@ -97,12 +99,18 @@ async def graphs(ctx, *, code):
     else:
         ia = ''
 
-    url = 'https://skanderbeg.pm/api.php?key='+SKANDERBEG_API+'&scope=getCountryData&save=' + save + '&tag=IRE&value=inc_no_subs;total_development;buildings_value;provinces;total_army;qualityScore;total_mana_spent_on_deving;total_mana_on_teching_up;spent_total;fdp;total_mana_spent_on_deving;battleCasualties;max_manpower;continents;dev_clicks;total_navy;total_army;hex;player;countryName&' + ia + '&format=json'
+    url = getUrl(save, ia)
+    #generates the URL for the skanderbeg request given conditions above
+    def getUrl (saveID, iaID):
+      return 'https://skanderbeg.pm/api.php?key='+SKANDERBEG_API+'&scope=getCountryData&save=' + saveID + '&tag=IRE&value=inc_no_subs;total_development;buildings_value;provinces;total_army;qualityScore;total_mana_spent_on_deving;total_mana_on_teching_up;spent_total;fdp;total_mana_spent_on_deving;battleCasualties;max_manpower;continents;dev_clicks;total_navy;total_army;hex;player;countryName&' + iaID + '&format=json'
+    
+    #gets response from Skanderbeg API, parses to data.json file
     response = rq.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     with open('data.json', 'w', encoding='utf-8') as f_out:
         f_out.write(soup.prettify())
 
+    #loads data.json into a variable, data
     with open('data.json') as json_file:
         try:
             data = json.load(json_file)
@@ -110,6 +118,7 @@ async def graphs(ctx, *, code):
             await ctx.send(
                 f'Invalid Skanderbeg Save id / the Skanderbeg server is offline \n Try to redo the command with the correct id or dm me with:,creator')
 
+    #creates dataframe with pandas
     df = pd.read_json('data.json')
     corpus = df.iloc[0][1]
     csv_columns = ['tag', 'fdp', 'battleCasualties', 'max_manpower', 'countryName', 'player', 'total_development',
