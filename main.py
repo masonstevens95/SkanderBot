@@ -235,17 +235,15 @@ async def graphs(ctx, *, code):
     df1['buildingsvalue'] = df1['buildingsvalue'].fillna(0)
     df2['buildingsvalue'] = df2['buildingsvalue'].fillna(0)
 
-
+    #lista1 is used for when there are multiple weeks. will have to be refactored
     lista1 = [df1, df2]
     lista = [df1]
-    # date = [1444, 1469, 1481, 1]
 
     #tags to list
     tags = df1['tag'].tolist()
-    tagss = tags
-    # print(tags)
+    # tagss = tags
 
-
+    #get "countries" list not really players. will refactor later
     players = df1['countryName'].tolist()
     i = 0
     # print("Players list: \n")
@@ -257,112 +255,48 @@ async def graphs(ctx, *, code):
             players[i] = tags[i]
         i += 1
     
-    
-    #
-    def trial(listadf):
-        i = 0
-        for df in listadf:
-            dict = transposeReplace(df)
-            humandict = {item: dict.get(item) for item in tagss}
-            playerdev = humanvalue(humandict, 'totaldevelopment', tags)
-            playerincome = humanvalue(humandict, 'incnosubs', tags)
-            playerbuildingsvalue = humanvalue(humandict, 'buildingsvalue', tags)
-            playerprovinces = humanvalue(humandict, 'provinces', tags)
-            playerbattlecasualites = humanvalue(humandict, 'battleCasualties', tags)
-            playertotalarmy = humanvalue(humandict, 'totalarmy', tags)
-            playerqualityscore = humanvalue(humandict, 'qualityScore', tags)
-            playermanadev = humanvalue(humandict, 'totalmanaspentondeving', tags)
-            playermanatech = humanvalue(humandict, 'totalmanaontechingup', tags)
-            playermoneyspent = humanvalue(humandict, 'spenttotal', tags)
-            playermaxmanpower = humanvalue(humandict, 'maxmanpower', tags)
-            playertotalnavy = humanvalue(humandict, 'totalnavy', tags)
-            playerfdp = humanvalue(humandict, 'fdp', tags)
-            playerclick = humanvalue(humandict, 'devclicks', tags)
-            if i == 0:
-                a = [playerdev]
-                b = [playerincome]
-                c = [playerbuildingsvalue]
-                d = [playerprovinces]
-                e = [playerbattlecasualites]
-                f = [playertotalarmy]
-                g = [playerqualityscore]
-                h = [playermanadev]
-                ix = [playermanatech]
-                l = [playermoneyspent]
-                n = [playermaxmanpower]
-                m = [playertotalnavy]
-                o = [playerfdp]
-                p = [playerclick]
-                i += 1
+    # print("tags:")
+    # print(tags)
+    # print("tagss:")
+    # print(tagss)
 
-            else:
-                i += 1
-                a.append(playerdev)
-                b.append(playerincome)
-                c.append(playerbuildingsvalue)
-                d.append(playerprovinces)
-                e.append(playerbattlecasualites)
-                f.append(playertotalarmy)
-                g.append(playerqualityscore)
-                h.append(playermanadev)
-                ix.append(playermanatech)
-                l.append(playermoneyspent)
-                n.append(playermaxmanpower)
-                m.append(playertotalnavy)
-                o.append(playerfdp)
-                p.append(playerclick)
-        dfplayerdev = pd.DataFrame(a, columns=players)
-        dfplayerincome = pd.DataFrame(b, columns=players)
-        dfplayerbuildingsvalue = pd.DataFrame(c, columns=players)
-        dfplayerprovinces = pd.DataFrame(d, columns=players)
-        dfplayerbattlecasualites = pd.DataFrame(e, columns=players)
-        dfplayertotalarmy = pd.DataFrame(f, columns=players)
-        dfplayerqualityscore = pd.DataFrame(g, columns=players)
-        dfplayermanadev = pd.DataFrame(h, columns=players)
-        dfplayermanatech = pd.DataFrame(ix, columns=players)
-        dfplayermoneyspent = pd.DataFrame(l, columns=players)
-        dfplayermaxmanpower = pd.DataFrame(n, columns=players)
-        dfplayertotalnavy = pd.DataFrame(m, columns=players)
-        playerfdp = pd.DataFrame(o, columns=players)
-        playerclick = pd.DataFrame(p, columns=players)
-
-        tutto = [dfplayerdev, dfplayerincome, dfplayerbuildingsvalue, dfplayerprovinces, dfplayerbattlecasualites,
-                 dfplayertotalarmy, dfplayerqualityscore, dfplayermanadev, dfplayermanatech, dfplayermoneyspent,
-                 dfplayermaxmanpower, dfplayertotalnavy, playerfdp, playerclick]
-        return tutto
-
-    ogni = trial(lista)
+    #grabs all the dataframes
+    allDataFrames = trial(lista, tags, players)
     k = 0
-    # colori grafico
 
-    colori = ['black', 'grey', 'rosybrown', 'brown', 'darkred', 'red', 'tomato', 'coral', 'orangered', 'sienna', 'peru',
+    # colors graphic. assigned later, but not used? 
+    colors = ['black', 'grey', 'rosybrown', 'brown', 'darkred', 'red', 'tomato', 'coral', 'orangered', 'sienna', 'peru',
               'orange', 'goldenrod', 'gold', 'khaki', 'olive', 'yellow', 'lawngreen', 'green', 'lime', 'teal', 'cyan',
               'steelblue', 'navy', 'blue', 'blueviolet', 'indigo', 'violet', 'magenta', 'deeppink']
 
-    listaz = ogni[0].columns
-    colornazioni = {}
+    #Listaz is actually just all the country names
+    listaz = allDataFrames[0].columns
+    nationColor = {}
     count = 0
     hex = df1['hex']
     for nation in listaz:
-        colornazioni[nation] = hex[count]
+        nationColor[nation] = hex[count]
         count = count + 1
 
+    #find maximum number of players
     az = np.linspace(0, 1, len(players))
-    massimo = len(lines) - 1
-    if massimo > 20:
+    playerMaximum = len(lines) - 1
+    if playerMaximum > 20:
         resp = ' but the optimal maximum is around 20'
         y = str(20)
     else:
         resp = ''
-        y = str(massimo)
-    print('how many nation do you want ot print? the max is ' + str(massimo) + resp)
+        y = str(playerMaximum)
+    
+    print('how many nation do you want ot print? the max is ' + str(playerMaximum) + resp)
+
     y = int(y)
     f = 100 / y
     alpha1 = 0.8
     alphagrid = 0.4
     sz = calcolatorespaziatrura(y)
     sizes = calcolosize(y)
-    for s in ogni:
+    for s in allDataFrames:
         if k == 0:  # dev
             plt.figure(figsize=[19.2, 10.8])
             s = s.sort_values(by=(len(s) - 1), axis=1, ascending=False)  # sort data
@@ -370,7 +304,7 @@ async def graphs(ctx, *, code):
             s = s.iloc[:, range(0, y)]
             coloriar = []
             for nomej in s.columns:
-                coloriar.append(colornazioni[nomej])
+                coloriar.append(nationColor[nomej])
 
             ax1 = s.loc[len(s) - 1].plot.bar(color=coloriar, alpha=alpha1, edgecolor='black')  # bar plt
             plt.grid(axis='y', alpha=alphagrid)
@@ -416,7 +350,7 @@ async def graphs(ctx, *, code):
             s = s.iloc[:, range(0, y)]
             coloriar = []
             for nomej in s.columns:
-                coloriar.append(colornazioni[nomej])
+                coloriar.append(nationColor[nomej])
 
             ax1 = s.loc[len(s) - 1].plot.bar(color=coloriar, alpha=alpha1, edgecolor='black')  # bar plt
             plt.grid(axis='y', alpha=alphagrid)
@@ -471,14 +405,14 @@ async def graphs(ctx, *, code):
 
                 for nomej in s.columns:
                     try:
-                        coloriar.append(colornazioni[nomej])
+                        coloriar.append(nationColor[nomej])
                     except:
                         coloriar.append('gray')
             else:
                 coloriar = []
                 for nomej in s.columns:
                     try:
-                        coloriar.append(colornazioni[nomej])
+                        coloriar.append(nationColor[nomej])
                     except:
                         coloriar.append('gray')
 
@@ -495,7 +429,7 @@ async def graphs(ctx, *, code):
             s = s.iloc[:, range(0, y)]
             coloriar = []
             for nomej in s.columns:
-                coloriar.append(colornazioni[nomej])
+                coloriar.append(nationColor[nomej])
 
             ax1 = s.loc[len(s) - 1].plot.bar(color=coloriar, alpha=alpha1, edgecolor='black')  # bar plt
             plt.grid(axis='y', alpha=alphagrid)
@@ -530,7 +464,7 @@ async def graphs(ctx, *, code):
             s = s.iloc[:, range(0, y)]
             coloriar = []
             for nomej in s.columns:
-                coloriar.append(colornazioni[nomej])
+                coloriar.append(nationColor[nomej])
 
             ax1 = s.loc[len(s) - 1].plot.bar(color=coloriar, alpha=alpha1, edgecolor='black')  # bar plt
             plt.grid(axis='y', alpha=alphagrid)
@@ -576,7 +510,7 @@ async def graphs(ctx, *, code):
             s = s.iloc[:, range(0, y)]
             coloriar = []
             for nomej in s.columns:
-                coloriar.append(colornazioni[nomej])
+                coloriar.append(nationColor[nomej])
 
             ax1 = s.loc[len(s) - 1].plot.bar(color=coloriar, alpha=alpha1, edgecolor='black')  # bar plt
             plt.grid(axis='y', alpha=alphagrid)
@@ -620,7 +554,7 @@ async def graphs(ctx, *, code):
             s = s.iloc[:, range(0, y)]
             coloriar = []
             for nomej in s.columns:
-                coloriar.append(colornazioni[nomej])
+                coloriar.append(nationColor[nomej])
 
             ax1 = s.loc[len(s) - 1].plot.bar(color=coloriar, alpha=alpha1, edgecolor='black')  # bar plt
             plt.grid(axis='y', alpha=alphagrid)
@@ -655,7 +589,7 @@ async def graphs(ctx, *, code):
             s = s.iloc[:, range(0, y)]
             coloriar = []
             for nomej in s.columns:
-                coloriar.append(colornazioni[nomej])
+                coloriar.append(nationColor[nomej])
 
             ax1 = s.loc[len(s) - 1].plot.bar(color=coloriar, alpha=alpha1, edgecolor='black')  # bar plt # bar plt
             plt.grid(axis='y', alpha=alphagrid)
@@ -693,7 +627,7 @@ async def graphs(ctx, *, code):
             s = s.iloc[:, range(0, y)]
             coloriar = []
             for nomej in s.columns:
-                coloriar.append(colornazioni[nomej])
+                coloriar.append(nationColor[nomej])
 
             ax1 = s.loc[len(s) - 1].plot.bar(color=coloriar, alpha=alpha1, edgecolor='black')  # bar plt
             plt.grid(axis='y', alpha=alphagrid)
@@ -721,7 +655,7 @@ async def graphs(ctx, *, code):
             s = s.iloc[:, range(0, y)]
             coloriar = []
             for nomej in s.columns:
-                coloriar.append(colornazioni[nomej])
+                coloriar.append(nationColor[nomej])
 
             ax1 = s.loc[len(s) - 1].plot.bar(color=coloriar, alpha=alpha1, edgecolor='black')  # bar plt
             plt.grid(axis='y', alpha=alphagrid)
@@ -771,7 +705,7 @@ async def graphs(ctx, *, code):
             s = s.iloc[:, range(0, y)]
             coloriar = []
             for nomej in s.columns:
-                coloriar.append(colornazioni[nomej])
+                coloriar.append(nationColor[nomej])
 
             ax1 = s.loc[len(s) - 1].plot.bar(color=coloriar, alpha=alpha1, edgecolor='black')  # bar plt
             plt.grid(axis='y', alpha=alphagrid)
@@ -808,7 +742,7 @@ async def graphs(ctx, *, code):
                 s = s.iloc[:, range(0, y)]
                 coloriar = []
                 for nomej in s.columns:
-                    coloriar.append(colornazioni[nomej])
+                    coloriar.append(nationColor[nomej])
 
                 ax1 = s.loc[len(s) - 1].plot.bar(color=coloriar, alpha=alpha1, edgecolor='black')  # bar plt
                 plt.grid(axis='y', alpha=alphagrid)
@@ -872,11 +806,11 @@ async def graphs(ctx, *, code):
 
     h = boh(lista1)
 
-    dev = ogni[0]
-    pro = ogni[3]
-    manpower = ogni[10]
-    income = ogni[1]
-    fdp = ogni[12]
+    dev = allDataFrames[0]
+    pro = allDataFrames[3]
+    manpower = allDataFrames[10]
+    income = allDataFrames[1]
+    fdp = allDataFrames[12]
     plt.figure(figsize=[19.2, 10.8])
     fdpdev = [a * b for a, b in zip(dev.loc[0], fdp.loc[0])]
     dffdpdev = pd.DataFrame(np.array([fdpdev]), columns=players)
@@ -892,7 +826,7 @@ async def graphs(ctx, *, code):
     dfavgdev = dfavgdev.iloc[:, range(0, y)]
     coloriar = []
     for nomej in dfavgdev.columns:
-        coloriar.append(colornazioni[nomej])
+        coloriar.append(nationColor[nomej])
     ax1 = dfavgdev.loc[len(dfavgdev) - 1].plot.bar(color=coloriar, alpha=alpha1, edgecolor='black')  # bar plt
     plt.grid(axis='y', alpha=alphagrid)
 
@@ -912,7 +846,7 @@ async def graphs(ctx, *, code):
     dfavgmanpower = dfavgmanpower.iloc[:, range(0, y)]
     coloriar = []
     for nomej in dfavgmanpower.columns:
-        coloriar.append(colornazioni[nomej])
+        coloriar.append(nationColor[nomej])
     ax1 = dfavgmanpower.loc[len(dfavgmanpower) - 1].plot.bar(color=coloriar, alpha=alpha1, edgecolor='black')
     plt.grid(axis='y', alpha=alphagrid)
 
@@ -931,7 +865,7 @@ async def graphs(ctx, *, code):
     dfavgincome = dfavgincome.iloc[:, range(0, y)]
     coloriar = []
     for nomej in dfavgincome.columns:
-        coloriar.append(colornazioni[nomej])
+        coloriar.append(nationColor[nomej])
     ax1 = dfavgincome.loc[len(dfavgincome) - 1].plot.bar(color=coloriar, alpha=alpha1, edgecolor='black')
     plt.grid(axis='y', alpha=alphagrid)
 
@@ -968,7 +902,7 @@ async def graphs(ctx, *, code):
         dfdiffincome = dfdiffincome.iloc[:, range(0, y)]
         coloriar = []
         for nomej in dfdiffincome.columns:
-            coloriar.append(colornazioni[nomej])
+            coloriar.append(nationColor[nomej])
         dfdiffincomeper = dfdiffincomeper.iloc[:, range(0, y)]
         ax1 = dfdiffincome.iloc[-1].plot.bar(color=coloriar, alpha=alpha1, edgecolor='black')
         plt.grid(axis='y', alpha=alphagrid)
@@ -1055,14 +989,14 @@ def calcolosize(ncolumn):
     size = ((1 / 5) * -ncolumn) + 14
     return size
 
-#TODO: what was j for? what is human value
-def humanvalue(dict, I, tags):
-        j = I
+#HumanValue checks if the person is a human or not
+def humanvalue(dict, valueName, tags):
+        j = valueName
         a = []
         for i in tags:
             x = dict[i]
             try:
-                s = x[I]
+                s = x[valueName]
                 y = round(s, 2)
                 a.append(y)
             except:
@@ -1100,6 +1034,7 @@ def transposeReplace(df):
         dict[y] = dict.pop(i)
     return dict
 
+#UNUSED
 def human(df):
     Humanplayers = df.loc[
         (df['tag'] == 'TUR') | (df['tag'] == 'FRA') | (df['tag'] == 'MOS') | (df['tag'] == 'CAS') | (
@@ -1107,6 +1042,93 @@ def human(df):
                 df['tag'] == 'SWE') | (df['tag'] == 'BRA') | (df['tag'] == 'HOL') | (
                 df['tag'] == 'SWI') | (df['tag'] == 'PAL')]
     return Humanplayers
+
+#this is the main function to get all dataframes
+def trial(listadf, tags, players):
+  i = 0
+  for df in listadf:
+    # print("Dataframe in Trial, number ")
+    # print(i)
+    # print(": \n")
+    # print(df)
+    dict = transposeReplace(df)
+    humandict = {item: dict.get(item) for item in tags}
+    # print("humanDict")
+    # print(humandict)
+    playerdev = humanvalue(humandict, 'totaldevelopment', tags)
+    playerincome = humanvalue(humandict, 'incnosubs', tags)
+    playerbuildingsvalue = humanvalue(humandict, 'buildingsvalue', tags)
+    playerprovinces = humanvalue(humandict, 'provinces', tags)
+    playerbattlecasualites = humanvalue(humandict, 'battleCasualties', tags)
+    playertotalarmy = humanvalue(humandict, 'totalarmy', tags)
+    playerqualityscore = humanvalue(humandict, 'qualityScore', tags)
+    playermanadev = humanvalue(humandict, 'totalmanaspentondeving', tags)
+    playermanatech = humanvalue(humandict, 'totalmanaontechingup', tags)
+    playermoneyspent = humanvalue(humandict, 'spenttotal', tags)
+    playermaxmanpower = humanvalue(humandict, 'maxmanpower', tags)
+    playertotalnavy = humanvalue(humandict, 'totalnavy', tags)
+    playerfdp = humanvalue(humandict, 'fdp', tags)
+    playerclick = humanvalue(humandict, 'devclicks', tags)
+
+    #always true?
+    if i == 0:
+      a = [playerdev]
+      b = [playerincome]
+      c = [playerbuildingsvalue]
+      d = [playerprovinces]
+      e = [playerbattlecasualites]
+      f = [playertotalarmy]
+      g = [playerqualityscore]
+      h = [playermanadev]
+      ix = [playermanatech]
+      l = [playermoneyspent]
+      n = [playermaxmanpower]
+      m = [playertotalnavy]
+      o = [playerfdp]
+      p = [playerclick]
+      i += 1
+
+    #never true?
+    else:
+      print("something unusual happened in trial")
+
+      i += 1
+      a.append(playerdev)
+      b.append(playerincome)
+      c.append(playerbuildingsvalue)
+      d.append(playerprovinces)
+      e.append(playerbattlecasualites)
+      f.append(playertotalarmy)
+      g.append(playerqualityscore)
+      h.append(playermanadev)
+      ix.append(playermanatech)
+      l.append(playermoneyspent)
+      n.append(playermaxmanpower)
+      m.append(playertotalnavy)
+      o.append(playerfdp)
+      p.append(playerclick)
+
+  #All of these individually are going to be a graph
+  #TODO: should be separated into different funtions
+  dfplayerdev = pd.DataFrame(a, columns=players)
+  dfplayerincome = pd.DataFrame(b, columns=players)
+  dfplayerbuildingsvalue = pd.DataFrame(c, columns=players)
+  dfplayerprovinces = pd.DataFrame(d, columns=players)
+  dfplayerbattlecasualites = pd.DataFrame(e, columns=players)
+  dfplayertotalarmy = pd.DataFrame(f, columns=players)
+  dfplayerqualityscore = pd.DataFrame(g, columns=players)
+  dfplayermanadev = pd.DataFrame(h, columns=players)
+  dfplayermanatech = pd.DataFrame(ix, columns=players)
+  dfplayermoneyspent = pd.DataFrame(l, columns=players)
+  dfplayermaxmanpower = pd.DataFrame(n, columns=players)
+  dfplayertotalnavy = pd.DataFrame(m, columns=players)
+  playerfdp = pd.DataFrame(o, columns=players)
+  playerclick = pd.DataFrame(p, columns=players)
+
+  everything = [dfplayerdev, dfplayerincome, dfplayerbuildingsvalue, dfplayerprovinces, dfplayerbattlecasualites,
+            dfplayertotalarmy, dfplayerqualityscore, dfplayermanadev, dfplayermanatech, dfplayermoneyspent,
+            dfplayermaxmanpower, dfplayertotalnavy, playerfdp, playerclick]
+  return everything
 
 #-------------------------RUN BOT----------------------------
 
