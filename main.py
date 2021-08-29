@@ -8,7 +8,8 @@ import json
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import config
+#import config
+import os
 IGNORE_EXCEPTIONS = (CommandNotFound, BadArgument)
 client = commands.Bot(command_prefix=',')
 
@@ -1047,4 +1048,5 @@ async def creator(ctx):
     await ctx.send('My creator is mak84271#3674,and he is the best eu4 player')
 
 
-client.run(config.key)
+#client.run(config.key)
+client.run(os.environ['KEY'])
