@@ -57,6 +57,10 @@ async def help(ctx):
     embed.add_field(name='!SkanderBot creator', value='returns the discord id of me:the creator', inline=False)
     await ctx.send(embed=embed)
 
+#~~~~~~~~~~~~~~~~~~~~~CREATOR~~~~~~~~~~~~~~~~~~~~~
+@client.command()
+@cooldown(1,15, BucketType.user)
+async def creator(ctx):
 
 
 #~~~~~~~~~~~~~~~~~~~~~GRAPHS~~~~~~~~~~~~~~~~~~~~~
@@ -1053,9 +1057,7 @@ async def graphs(ctx, *, code):
     await ctx.send('Spam limiter: 2 minutes in Cooldown')
 
 
-@client.command()
-@cooldown(1,15, BucketType.user)
-async def creator(ctx):
+
     await ctx.send('My creator is MasonStevens95#5018,and he is the best eu4 player')
 
 
