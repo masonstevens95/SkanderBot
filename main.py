@@ -12,12 +12,13 @@ import os
 IGNORE_EXCEPTIONS = (CommandNotFound, BadArgument)
 client = commands.Bot(command_prefix='!SkanderBot ')
 
-#env variables 
+#------------------ENV Vars--------------------
 SKANDERBEG_API = os.environ['SKANDERBEG API']
 SKANDERBEG_WEEKS = {
   "Week 1": os.environ['SKANDERBEG WK1'], 
   "Week 2": os.environ['SKANDERBEG WK2']}
 
+#-------------------SETUP---------------------
 client.remove_command('help')
 @commands.Cog.listener()
 async def on_command_error(self, ctx, exc):
@@ -27,21 +28,23 @@ async def on_command_error(self, ctx, exc):
                             color=0xFFBF00)
         await ctx.send(embed=emb)
 
-# @client.command()
-# async def test(ctx, arg):
-#     await ctx.send(arg)
 
+#--------------------EVENTS--------------------
+# bot ready statement on start
 @client.event
 async def on_ready():
     print('bot ready')
 
 
+#-------------------COMMANDS---------------------------
+
+#~~~~~~~~~~~~~~~~~~~~~PING~~~~~~~~~~~~~~~~~~~~~~~
 @client.command()
 @cooldown(1,15, BucketType.user)
 async def ping(ctx):
     await ctx.send(f'pong {round(client.latency * 1000)}ms')
 
-
+#~~~~~~~~~~~~~~~~~~~~~HELP~~~~~~~~~~~~~~~~~~~~~
 @client.command(pass_context=True)
 @cooldown(1,15, BucketType.user)
 async def help(ctx):
@@ -55,6 +58,8 @@ async def help(ctx):
     await ctx.send(embed=embed)
 
 
+
+#~~~~~~~~~~~~~~~~~~~~~GRAPHS~~~~~~~~~~~~~~~~~~~~~
 @client.command()
 @cooldown(1, 120, BucketType.user)
 async def graphs(ctx, *, code):
