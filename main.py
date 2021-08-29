@@ -8,10 +8,15 @@ import json
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-#import config
 import os
 IGNORE_EXCEPTIONS = (CommandNotFound, BadArgument)
-client = commands.Bot(command_prefix=',')
+client = commands.Bot(command_prefix='!SkanderBot ')
+
+#env variables 
+SKANDERBEG_API = os.environ['SKANDERBEG API']
+SKANDERBEG_WEEKS = {
+  "Week 1": os.environ['SKANDERBEG WK1'], 
+  "Week 2": os.environ['SKANDERBEG WK2']}
 
 client.remove_command('help')
 @commands.Cog.listener()
@@ -22,6 +27,9 @@ async def on_command_error(self, ctx, exc):
                             color=0xFFBF00)
         await ctx.send(embed=emb)
 
+# @client.command()
+# async def test(ctx, arg):
+#     await ctx.send(arg)
 
 @client.event
 async def on_ready():
@@ -41,12 +49,10 @@ async def help(ctx):
     embed=discord.Embed(colour=discord.Colour.dark_blue())
     embed.set_author(name='Help')
     embed.add_field(name='Description',value='The Goal of this bot is to make graphs for Europa universalis 4,by using the Skanderbeg save data',inline=False)
-    embed.add_field(name=',ping',value='returns pong!',inline=False)
-    embed.add_field(name=',graphs',value=f'if you want to make graphs use this format: \n ,graphs Skanderbeg_Save_ID \n Ex:  ,graphs d852c8 \n you can get the Skanderbeg_Save_ID in the skanderbeg site in the ID column in My Maps (https://skanderbeg.pm/maps.php)',inline=False)
-    embed.add_field(name=',creator', value='returns the discord id of me:the creator', inline=False)
+    embed.add_field(name='!SkanderBot ping',value='returns pong!',inline=False)
+    embed.add_field(name='!SkanderBot graphs',value=f'if you want to make graphs use this format: \n !SkanderBot graphs Skanderbeg_Save_ID \n Ex:  !SkanderBot graphs d852c8 \n you can get the Skanderbeg_Save_ID in the skanderbeg site in the ID column in My Maps (https://skanderbeg.pm/maps.php)',inline=False)
+    embed.add_field(name='!SkanderBot creator', value='returns the discord id of me:the creator', inline=False)
     await ctx.send(embed=embed)
-
-
 
 
 @client.command()
@@ -82,7 +88,7 @@ async def graphs(ctx, *, code):
     else:
         ia = ''
 
-    url = 'https://skanderbeg.pm/api.php?key=963df40b3b93a81013da34dfdd815583&scope=getCountryData&save=' + save + '&tag=IRE&value=inc_no_subs;total_development;buildings_value;provinces;total_army;qualityScore;total_mana_spent_on_deving;total_mana_on_teching_up;spent_total;fdp;total_mana_spent_on_deving;battleCasualties;max_manpower;continents;dev_clicks;total_navy;total_army;hex;player;countryName&' + ia + '&format=json'
+    url = 'https://skanderbeg.pm/api.php?key='+SKANDERBEG_API+'&scope=getCountryData&save=' + save + '&tag=IRE&value=inc_no_subs;total_development;buildings_value;provinces;total_army;qualityScore;total_mana_spent_on_deving;total_mana_on_teching_up;spent_total;fdp;total_mana_spent_on_deving;battleCasualties;max_manpower;continents;dev_clicks;total_navy;total_army;hex;player;countryName&' + ia + '&format=json'
     response = rq.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     with open('data.json', 'w', encoding='utf-8') as f_out:
@@ -125,7 +131,7 @@ async def graphs(ctx, *, code):
     except IOError:
         print("I/O error")
     if save2 != '':
-        url = 'https://skanderbeg.pm/api.php?key=963df40b3b93a81013da34dfdd815583&scope=getCountryData&save=' + save2 + '&tag=IRE&value=inc_no_subs;total_development;buildings_value;provinces;total_army;qualityScore;total_mana_spent_on_deving;total_mana_on_teching_up;spent_total;fdp;total_mana_spent_on_deving;battleCasualties;max_manpower;continents;dev_clicks;total_navy;hex;total_army;player;countryName&' + ia + '&format=json'
+        url = 'https://skanderbeg.pm/api.php?key='+SKANDERBEG_API+'&scope=getCountryData&save=' + save2 + '&tag=IRE&value=inc_no_subs;total_development;buildings_value;provinces;total_army;qualityScore;total_mana_spent_on_deving;total_mana_on_teching_up;spent_total;fdp;total_mana_spent_on_deving;battleCasualties;max_manpower;continents;dev_clicks;total_navy;hex;total_army;player;countryName&' + ia + '&format=json'
         response = rq.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
         with open('data.json', 'w', encoding='utf-8') as f_out:
@@ -1045,8 +1051,7 @@ async def graphs(ctx, *, code):
 @client.command()
 @cooldown(1,15, BucketType.user)
 async def creator(ctx):
-    await ctx.send('My creator is mak84271#3674,and he is the best eu4 player')
+    await ctx.send('My creator is MasonStevens95#5018,and he is the best eu4 player')
 
 
-#client.run(config.key)
-client.run(os.environ['KEY'])
+client.run(os.environ['DISCORD KEY'])
