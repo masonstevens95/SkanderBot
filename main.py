@@ -15,11 +15,14 @@ IGNORE_EXCEPTIONS = (CommandNotFound, BadArgument)
 client = commands.Bot(command_prefix='!SkanderBot ')
 
 #------------------ENV Vars--------------------
-SKANDERBEG_API = os.environ['SKANDERBEG API']
-SKANDERBEG_WEEKS = {
-    "Week 1": os.environ['SKANDERBEG WK1'],
-    "Week 2": os.environ['SKANDERBEG WK2']
-}
+# SKANDERBEG_API = os.environ['SKANDERBEG API']
+# SKANDERBEG_WEEKS = {
+#     "Week 1": os.environ['SKANDERBEG WK1'],
+#     "Week 2": os.environ['SKANDERBEG WK2']
+# }
+SKANDERBEG_API = "2fe79beca3a56dbf49185845ce109cec"
+DISCORD_KEY = "ODgxMzU2ODY0MDcwMjM4MjA5.YSrpiw.7baeGE4lbKUmGDU3cRxuAtiM6gU"
+
 
 #-------------------SETUP---------------------
 client.remove_command('help')
@@ -1135,9 +1138,6 @@ async def graphs(ctx, *, code):
     print('check your graphs folder(Press ENTER to close)')
     await ctx.send('Spam limiter: 2 minutes in Cooldown')
 
-    await ctx.send(
-        'My creator is MasonStevens95#5018,and he is the best eu4 player')
-
 
 #-----------------------------FUNCTIONS---------------------------------
 
@@ -1333,4 +1333,4 @@ def trial(listadf, tags, players):
 
 #-------------------------RUN BOT----------------------------
 
-client.run(os.environ['DISCORD KEY'])
+client.run(DISCORD_KEY)
