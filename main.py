@@ -80,10 +80,10 @@ async def help(ctx):
 
 
 #~~~~~~~~~~~~~~~~~~~~~CREATOR~~~~~~~~~~~~~~~~~~~~~
-# @client.command()
-# @cooldown(1,15, BucketType.user)
-# async def creator(ctx):
-
+@client.command()
+@cooldown(1,15, BucketType.user)
+async def creator(ctx):
+  await ctx.send('The first creator of this bot is mak84271#3674.\nMasonStevens95#5018 then picked up the torch to refactor and add functionality including 3D chart plotting, and the ability to see multiple Skanderbeg campaigns at one time (soon).\nIf you want to help with this monetarily, please donate to the Skanderbeg Patreon :) https://www.patreon.com/skanderbeg')
 
 #~~~~~~~~~~~~~~~~~~~~~GRAPHS~~~~~~~~~~~~~~~~~~~~~
 @client.command()
@@ -331,8 +331,8 @@ async def graphs(ctx, *, code):
     f = 100 / y
     alpha1 = 0.8
     alphagrid = 0.4
-    sz = calcolatorespaziatrura(y)
-    sizes = calcolosize(y)
+    sz = adjustTextSpacingOfColumns(y)
+    sizes = adjustTextSizeForColumns(y)
 
     #actually does the plotting
     for s in allDataFrames:
@@ -1050,8 +1050,8 @@ async def graphs(ctx, *, code):
         dfdiffincome = dfdiffincome.sort_values(by=1, axis=1, ascending=False)
         if len(dfdiffincome.columns) <= y:
             y = len(dfdiffincome.columns)
-        sz = calcolatorespaziatrura(y)
-        sizes = calcolosize(y)
+        sz = adjustTextSpacingOfColumns(y)
+        sizes = adjustTextSizeForColumns(y)
         dfdiffincomeper = pd.DataFrame(np.array(
             [playerincome.iloc[-1].tolist()]),
                                        columns=playerincome.columns)
@@ -1162,13 +1162,13 @@ def a_su_b(dfa, dfb, nomicolumn):
 
 
 #TODO: Unknown what used for - calculate ranges between? for graphs
-def calcolatorespaziatrura(ncolumn):
+def adjustTextSpacingOfColumns(ncolumn):
     a = ((4 * ncolumn) + 45) / 2000
     return a
 
 
 #TODO: Calculate column size?
-def calcolosize(ncolumn):
+def adjustTextSizeForColumns(ncolumn):
     size = ((1 / 5) * -ncolumn) + 14
     return size
 
