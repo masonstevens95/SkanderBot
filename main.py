@@ -340,6 +340,7 @@ async def graphs(ctx, *, code):
     #actually does the plotting
     for s in allDataFrames:
         if k == 0:  # dev
+            #dataframe, text spacing of column, text size for column, nation color, 100/player count, folder, alpha, alpha grid, player count
             plotDev(s, sz, sizes, nationColor, f, folder, alpha1, alphagrid, y)
         if k == 1:  # income
             plt.figure(figsize=[19.2, 10.8])

@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 
 
 def plotDev(s, sz, sizes, nationColor, f, folder, alpha1, alphagrid, y):
+
     plt.figure(figsize=[19.2, 10.8])
     s = s.sort_values(by=(len(s) - 1), axis=1, ascending=False)  # sort data
 
@@ -58,3 +59,10 @@ def plotDev(s, sz, sizes, nationColor, f, folder, alpha1, alphagrid, y):
                  size=sizes)
     plt.savefig(folder + 'dev.png')
     plt.close()
+
+
+
+
+
+
+
