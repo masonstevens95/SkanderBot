@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 import os
 from plottingFunctions import plotDev
+from Plot import Plot, DevPlot
 
 IGNORE_EXCEPTIONS = (CommandNotFound, BadArgument)
 client = commands.Bot(command_prefix='!SkanderBot ')
@@ -87,6 +88,12 @@ async def help(ctx):
 @cooldown(1,15, BucketType.user)
 async def creator(ctx):
   await ctx.send('The first creator of this bot is mak84271#3674.\nMasonStevens95#5018 then picked up the torch to refactor and add functionality including 3D chart plotting, and the ability to see multiple Skanderbeg campaigns at one time (soon).\nIf you want to help with this monetarily, please donate to the Skanderbeg Patreon :) https://www.patreon.com/skanderbeg')
+
+
+#~~~~~~~~~~~~~~~~~~~~~LOCKED LEDGER GRAPHS~~~~~~~~~~~~~~~~~~~~~
+# @client.command()
+# @cooldown(1, 120, BucketType.user)
+# async def lockedLedgerGraphs(ctx, *, code):
 
 #~~~~~~~~~~~~~~~~~~~~~GRAPHS~~~~~~~~~~~~~~~~~~~~~
 @client.command()
@@ -269,7 +276,7 @@ async def graphs(ctx, *, code):
     df1['buildingsvalue'] = df1['buildingsvalue'].fillna(0)
     df2['buildingsvalue'] = df2['buildingsvalue'].fillna(0)
 
-    #lista1 is used for when there are multiple weeks. will have to be refactored
+    #lista1 is used for when there are multiple weeks. will have to be refactored TODO
     lista1 = [df1, df2]
     lista = [df1]
 
@@ -277,7 +284,7 @@ async def graphs(ctx, *, code):
     tags = df1['tag'].tolist()
     # tagss = tags
 
-    #get "countries" list not really players. will refactor later
+    #get "countries" list not really players. will refactor later TODO
     players = df1['countryName'].tolist()
     i = 0
     # print("Players list: \n")
@@ -288,11 +295,6 @@ async def graphs(ctx, *, code):
         if type(player) == type(0.54):
             players[i] = tags[i]
         i += 1
-
-    # print("tags:")
-    # print(tags)
-    # print("tagss:")
-    # print(tagss)
 
     #grabs all the dataframes
     allDataFrames = trial(lista, tags, players)
@@ -337,11 +339,18 @@ async def graphs(ctx, *, code):
     sz = adjustTextSpacingOfColumns(y)
     sizes = adjustTextSizeForColumns(y)
 
+    #print all dataframes for reference
+    # allDataFrames.to_csv('allDataFrames.csv')
+
     #actually does the plotting
     for s in allDataFrames:
+        # s.to_csv(str(k))
         if k == 0:  # dev
             #dataframe, text spacing of column, text size for column, nation color, 100/player count, folder, alpha, alpha grid, player count
-            plotDev(s, sz, sizes, nationColor, f, folder, alpha1, alphagrid, y)
+            #plotDev(s, sz, sizes, nationColor, f, folder, alpha1, alphagrid, y)
+            devPlot = DevPlot(s, sz, sizes, nationColor, f, folder, alpha1, alphagrid, y)
+            devPlot.plotDev()
+
         if k == 1:  # income
             plt.figure(figsize=[19.2, 10.8])
             s = s.sort_values(by=(len(s) - 1), axis=1,
@@ -1124,7 +1133,7 @@ async def graphs(ctx, *, code):
         differenza(h[2], 'development')
         differenza(h[3], 'max manpower')
     xfiles = [
-        'dev clicks', 'max manpower', 'dev', 'income', 'armies', 'avg dev',
+        'dev clicks', 'max manpower', 'Development', 'income', 'armies', 'avg dev',
         'Battle casualities', 'Buildings Value', 'provinces', 'total navy',
         'moneyspent', 'manpower per province', 'Mana spent on teching up',
         'Mana spent on devving', 'income per dev(nation efficency)'
